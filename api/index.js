@@ -22,16 +22,11 @@ config();
 const app = express();
 
 // app.use(cors());
-// app.use(
-//     cors({
-//         origin: process.env.FRONTEND_URL.replace(/\/$/, ''),
-//         methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-//         credentials: true,
-//     })
-// );
 app.use(
     cors({
-        origin: 'https://blog-frontend-theta-gray.vercel.app',
+        origin: process.env.FRONTEND_URL.replace(/\/$/, ''),
+        methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+        credentials: true,
     })
 );
 
