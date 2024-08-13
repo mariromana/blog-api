@@ -16,8 +16,8 @@ import {
     UserController,
     PostController,
     CommentController,
+    FileController,
 } from '../controllers/index.js';
-
 config();
 const app = express();
 
@@ -30,7 +30,6 @@ app.use(
     })
 );
 
-console.log('MONGODB_URI:', process.env.MONGODB_URI);
 mongoose
     .connect(process.env.MONGODB_URI)
     .then(() => console.log('db ok'))
@@ -45,23 +44,18 @@ mongoose
     .then(() => console.log('MongoDB connected'))
     .catch((err) => console.log(err));
 
-const storage = multer.diskStorage({
-    destination: (_, __, cb) => {
-        if (!fs.existsSync('uploads')) {
-            fs.mkdirSync('uploads');
-        }
-        cb(null, 'uploads');
-    },
-    filename: (_, file, cb) => {
-        cb(null, file.originalname);
-    },
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
-
 app.use(express.json());
-
-app.use('/uploads', express.static('uploads'));
+app.post(
+    '/upload',
+    (req, res, next) => {
+        console.log(req.body);
+        next();
+    },
+    upload.single('image'),
+    FileController.uploadFile
+);
 
 app.post(
     '/auth/login',
@@ -81,11 +75,7 @@ app.get('/auth/me', checkAuth, UserController.getMe);
 app.post('/forgot-password', UserController.passwordForgot);
 app.post('/reset-password', UserController.resetPassword);
 app.patch('/users/:id', checkAuth, UserController.update);
-app.post('/upload', upload.single('image'), (req, res) => {
-    res.json({
-        url: `uploads/${req.file.originalname}`,
-    });
-});
+
 app.delete('/auth/:id', checkAuth, UserController.removeUser);
 app.get('/posts/new', PostController.getNew);
 app.get('/posts/popular', PostController.getPopularPosts);

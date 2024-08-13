@@ -102,7 +102,7 @@ export const getMe = async (req, res) => {
             });
         }
         const { passwordHash, ...userData } = user._doc;
-        res.setHeader('Cache-Control', 'public, max-age=3600');
+        // res.setHeader('Cache-Control', 'public, max-age=3600');
         res.json(userData);
     } catch (err) {
         console.log(err);
@@ -128,6 +128,7 @@ export const update = async (req, res) => {
         if (email) {
             user.email = email;
         }
+
         if (avatarUrl) {
             user.avatarUrl = avatarUrl;
         }
