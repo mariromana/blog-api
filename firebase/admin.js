@@ -3,25 +3,14 @@ import { config } from 'dotenv';
 
 config();
 
-console.log('FIREBASE_CONFIG:', process.env.FIREBASE_CONFIG);
-
-let firebaseConfig;
-
-try {
-    const firebaseConfigStr = process.env.FIREBASE_CONFIG.trim();
-
-    const serviceAccountStr = firebaseConfigStr.replace(/\\n/g, '\n');
-
-    const firebaseConfig = JSON.parse(serviceAccountStr);
-
-    console.log('Service Account:', firebaseConfig);
-} catch (error) {
-    console.error('Error parsing JSON:', error);
-}
-
 admin.initializeApp({
-    credential: admin.credential.cert(firebaseConfig),
+    credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    }),
     storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
 
 const bucket = admin.storage().bucket();
