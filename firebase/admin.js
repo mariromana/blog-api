@@ -8,8 +8,12 @@ console.log('FIREBASE_CONFIG:', process.env.FIREBASE_CONFIG);
 let firebaseConfig;
 
 try {
-    const serviceAccountStr = process.env.FIREBASE_CONFIG.replace(/\\n/g, '\n');
-    firebaseConfig = JSON.parse(serviceAccountStr);
+    const firebaseConfigStr = process.env.FIREBASE_CONFIG.trim();
+
+    const serviceAccountStr = firebaseConfigStr.replace(/\\n/g, '\n');
+
+    const firebaseConfig = JSON.parse(serviceAccountStr);
+
     console.log('Service Account:', firebaseConfig);
 } catch (error) {
     console.error('Error parsing JSON:', error);
