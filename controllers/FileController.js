@@ -14,44 +14,44 @@ export const uploadFile = async (req, res) => {
         return res.status(400).json({ message: 'No file uploaded.' });
     }
 
-    const blob = bucket.file(Date.now() + '-' + req.file.originalname);
-    const blobStream = blob.createWriteStream({
-        metadata: {
-            contentType: req.file.mimetype,
-        },
-    });
-
-    blobStream.on('error', (err) => {
-        console.error(err);
-        res.status(500).json({ message: 'Error uploading file.' });
-    });
-
-    blobStream.on('finish', async () => {
-        await blob.makePublic();
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-
-        const newFile = new FileModel({
-            filename: req.file.originalname,
-            filepath: publicUrl,
-            contentType: req.file.mimetype,
-            size: req.file.size,
+    try {
+        const blob = bucket.file(Date.now() + '-' + req.file.originalname);
+        const blobStream = blob.createWriteStream({
+            metadata: {
+                contentType: req.file.mimetype,
+            },
         });
 
-        try {
-            await newFile.save();
+        blobStream.on('error', (err) => {
+            console.error('Error uploading file:', err);
+            res.status(500).json({ message: 'Error uploading file.' });
+        });
 
-            res.json({
-                fileId: newFile._id,
-                filename: newFile.filename,
-                url: publicUrl,
-            });
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Error saving file metadata.' });
-        }
-    });
+        blobStream.on('finish', async () => {
+            try {
+                await blob.makePublic();
+                const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
 
-    blobStream.end(req.file.buffer);
+                res.json({
+                    filename: req.file.originalname,
+                    url: publicUrl,
+                });
+            } catch (err) {
+                console.error(
+                    'Error making file public or saving metadata:',
+                    err
+                );
+                res.status(500).json({
+                    message: 'Error saving file metadata.',
+                });
+            }
+        });
+
+        blobStream.end(req.file.buffer);
+    } catch (error) {
+        console.error('Error during file upload:', error);
+        res.status(500).json({ message: 'Error uploading file.' });
+    }
 };
 
 export const migrateFilesToFirebase = async () => {
