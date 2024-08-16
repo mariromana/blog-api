@@ -8,6 +8,8 @@
 # testing
 /coverage
 text.js
+firebase_private_key_base64.txt
+firebase_private_key.txt
 # production
 /build
 
